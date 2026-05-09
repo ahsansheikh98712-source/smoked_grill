@@ -825,3 +825,13 @@ model ChatMessage {
 //   WAITLIST
 //   REJECTED
 // }
+
+model Feedback {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@map("feedbacks")
+}
