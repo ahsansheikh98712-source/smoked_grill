@@ -68,9 +68,9 @@ export default function Navigation() {
     { href: '/subscription', label: 'Premium' },
   ];
 
-  const authNavItems = session
-    ? []
-    : [{ href: '/auth/signin', label: 'Sign In / Sign Up' }];
+  const authNavItems = status === 'unauthenticated'
+    ? [{ href: '/auth/signin', label: 'Sign In / Sign Up' }]
+    : [];
 
   const navItems = [...baseNavItems, ...authNavItems];
 
