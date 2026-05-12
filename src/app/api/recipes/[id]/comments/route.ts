@@ -50,7 +50,10 @@ export async function POST(
       return NextResponse.json({ error: 'Comment content is required' }, { status: 400 });
     }
 
-    const recipe = await prisma.recipe.findUnique({ where: { id } });
+    const recipe = await prisma.recipe.findUnique({
+      where: { id },
+      select: { title: true, authorId: true },
+    });
     if (!recipe) {
       return NextResponse.json({ error: 'Recipe not found' }, { status: 404 });
     }
@@ -74,12 +77,6 @@ export async function POST(
           include: { user: { select: { id: true, username: true, image: true } } },
         },
       },
-    });
-
-    // Notify recipe author (if commenter != author)
-    const recipe = await prisma.recipe.findUnique({
-      where: { id },
-      select: { title: true, authorId: true },
     });
     if (recipe && recipe.authorId !== (session.user.id as string)) {
       await createNotification({
