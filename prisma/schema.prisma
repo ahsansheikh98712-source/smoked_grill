@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,7 +8,6 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// User Management
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -25,8 +21,7 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@map("accounts")
@@ -43,82 +38,62 @@ model Session {
 }
 
 model User {
-  id              String    @id @default(cuid())
-  email           String    @unique
-  username        String    @unique
-  password        String?
-  firstName       String?
-  lastName        String?
-  name            String?
-  displayName     String?   @unique @map("display_name")
-  phone           String?   @map("phone")
-  birthday        DateTime? @map("birthday")
-  image           String?
-  emailVerified   DateTime?
-  bio             String?
-  location        String?
-  smokerType      String?
-  experienceLevel String?   @default("beginner")
-  joinedAt        DateTime  @default(now())
-  lastActive      DateTime  @default(now())
-  
-  // Subscription
+  id                   String              @id @default(cuid())
+  email                String              @unique
+  username             String              @unique
+  password             String?
+  firstName            String?
+  lastName             String?
+  name                 String?
+  displayName          String?             @unique @map("display_name")
+  phone                String?             @map("phone")
+  birthday             DateTime?           @map("birthday")
+  image                String?
+  emailVerified        DateTime?
+  bio                  String?
+  location             String?
+  smokerType           String?
+  experienceLevel      String?             @default("beginner")
+  joinedAt             DateTime            @default(now())
+  lastActive           DateTime            @default(now())
   stripeCustomerId     String?
   stripeSubscriptionId String?
-  subscriptionStatus   String?  @default("free") // free, active, canceled, past_due
-  subscriptionTier     String?  @default("free") // free, premium, pro
+  subscriptionStatus   String?             @default("free")
+  subscriptionTier     String?             @default("free")
   subscriptionEnds     DateTime?
-  adFree              Boolean  @default(false)
-  
-  // Creator Program
-  creatorTier         CreatorTier @default(NONE)
-  totalViews          Int         @default(0)
-  totalEarnings       Float       @default(0)
-  payoutThreshold     Float       @default(10) // Minimum $10 for payout
-  stripeConnectId     String?     // For creator payouts
-
-  // User content
-  recipes       Recipe[]
-  reviews       Review[]
-  ratings       Rating[]
-  comments      Comment[]
-  favorites     Favorite[]
-  follows       Follow[]  @relation("Follower")
-  followers     Follow[]  @relation("Following")
-  
-  // Collections and planning
-  collections   RecipeCollection[]
-  mealPlans     MealPlan[]
-  shoppingLists ShoppingList[]
-  
-  // Creator & Monetization
-  recipeViews         RecipeView[]
-  creatorPayouts      CreatorPayout[]
-  liveEvents          LiveEvent[] @relation("EventHost")
-  eventAttendees      LiveEventAttendee[]
-  subscriptions       Subscription[]
-  
-  // Forum/Community
-  posts         Post[]
-  postComments  PostComment[]
-  postVotes     PostVote[]
-
-  // Notifications
-  notifications Notification[]
-
-  // Onboarding
-  onboardingDone Boolean  @default(false)
-  favoriteMeats  String[] @default([])
-  cookerType     String?
-  skillLevel     String?
-  bbqStyle       String?
-
-  // Beta Testing
-  betaTester          BetaTester? @relation("UserBetaTester")
-
-  // Authentication
-  accounts      Account[]
-  sessions      Session[]
+  adFree               Boolean             @default(false)
+  creatorTier          CreatorTier         @default(NONE)
+  totalViews           Int                 @default(0)
+  totalEarnings        Float               @default(0)
+  payoutThreshold      Float               @default(10)
+  stripeConnectId      String?
+  bbqStyle             String?
+  cookerType           String?
+  favoriteMeats        String[]            @default([])
+  onboardingDone       Boolean             @default(false)
+  skillLevel           String?
+  accounts             Account[]
+  betaTester           BetaTester?         @relation("UserBetaTester")
+  comments             Comment[]
+  creatorPayouts       CreatorPayout[]
+  favorites            Favorite[]
+  follows              Follow[]            @relation("Follower")
+  followers            Follow[]            @relation("Following")
+  eventAttendees       LiveEventAttendee[]
+  liveEvents           LiveEvent[]         @relation("EventHost")
+  mealPlans            MealPlan[]
+  notifications        Notification[]
+  postComments         PostComment[]
+  postVotes            PostVote[]
+  posts                Post[]
+  ratings              Rating[]
+  collections          RecipeCollection[]
+  recipeViews          RecipeView[]
+  recipes              Recipe[]
+  reviews              Review[]
+  sessions             Session[]
+  shoppingLists        ShoppingList[]
+  subscriptions        Subscription[]
 
   @@map("users")
 }
@@ -132,88 +107,61 @@ model VerificationToken {
   @@map("verificationtokens")
 }
 
-// Recipe Management
 model Recipe {
-  id          String   @id @default(cuid())
-  title       String
-  description String
-  slug        String   @unique
-  
-  // Author
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  
-  // Recipe details
-  prepTime    Int      // minutes
-  cookTime    Int      // minutes
-  totalTime   Int      // minutes
-  servings    Int
-  difficulty  Difficulty
-  
-  // Category
-  category       String   @default("Other")
-
-  // BBQ specific
-  smokingWood    String?
-  smokerTemp     Int?     // Fahrenheit
-  internalTemp   Int?     // Target internal temperature
-  cookingMethod  CookingMethod
-  sauce          String?  // BBQ sauce type/style
-  seasoningRub   String?  // Seasoning mix or rub used
-  
-  // Content
-  instructions   Instruction[]
-  ingredients    RecipeIngredient[]
-  images         RecipeImage[]
-  tags           RecipeTag[]
-  
-  // Engagement
-  reviews        Review[]
-  ratings        Rating[]
-  comments       Comment[]
-  favorites      Favorite[]
-  
-  // Collections
-  collections    RecipeCollectionItem[]
-  mealPlanItems  MealPlanItem[]
-  
-  // Nutrition
-  nutrition      Nutrition?
-  
-  // Metadata
-  isPublished    Boolean  @default(false)
-  isDraft        Boolean  @default(true)
-  isPremium      Boolean  @default(false) // Requires premium to view full details
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
-  // Creator monetization
-  views          RecipeView[]
-  totalViews     Int      @default(0)
-  premiumViews   Int      @default(0)
-  
-  // SEO
-  metaTitle      String?
+  id              String                 @id @default(cuid())
+  title           String
+  description     String
+  slug            String                 @unique
+  authorId        String
+  prepTime        Int
+  cookTime        Int
+  totalTime       Int
+  servings        Int
+  difficulty      Difficulty
+  smokingWood     String?
+  smokerTemp      Int?
+  internalTemp    Int?
+  cookingMethod   CookingMethod
+  sauce           String?
+  seasoningRub    String?
+  isPublished     Boolean                @default(false)
+  isDraft         Boolean                @default(true)
+  isPremium       Boolean                @default(false)
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  totalViews      Int                    @default(0)
+  premiumViews    Int                    @default(0)
+  metaTitle       String?
   metaDescription String?
+  category        String                 @default("Other")
+  comments        Comment[]
+  favorites       Favorite[]
+  instructions    Instruction[]
+  mealPlanItems   MealPlanItem[]
+  nutrition       Nutrition?
+  ratings         Rating[]
+  collections     RecipeCollectionItem[]
+  images          RecipeImage[]
+  ingredients     RecipeIngredient[]
+  tags            RecipeTag[]
+  views           RecipeView[]
+  author          User                   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reviews         Review[]
 
   @@map("recipes")
 }
 
 model Ingredient {
-  id          String @id @default(cuid())
-  name        String @unique
-  category    IngredientCategory
-  
-  // Nutrition data per 100g
+  id              String             @id @default(cuid())
+  name            String             @unique
+  category        IngredientCategory
   caloriesPerGram Float?
   proteinPerGram  Float?
   carbsPerGram    Float?
   fatPerGram      Float?
-  
-  recipes     RecipeIngredient[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  recipes         RecipeIngredient[]
 
   @@map("ingredients")
 }
@@ -221,154 +169,133 @@ model Ingredient {
 model RecipeIngredient {
   id           String     @id @default(cuid())
   recipeId     String
-  recipe       Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   ingredientId String
-  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
-  
   amount       Float
   unit         String
-  preparation  String?    // "diced", "sliced", etc.
+  preparation  String?
   optional     Boolean    @default(false)
-  section      String?    // "For the rub", "For serving", etc.
+  section      String?
   order        Int        @default(0)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+  recipe       Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@map("recipe_ingredients")
 }
 
 model Instruction {
-  id          String @id @default(cuid())
+  id          String   @id @default(cuid())
   recipeId    String
-  recipe      Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  
   stepNumber  Int
   title       String?
   description String
-  temperature Int?     // Optional temperature for this step
-  time        Int?     // Optional time in minutes for this step
-  image       String?  // Optional image for this step
-  
+  temperature Int?
+  time        Int?
+  image       String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@unique([recipeId, stepNumber])
   @@map("instructions")
 }
 
-// Images and Media
 model RecipeImage {
-  id          String @id @default(cuid())
-  recipeId    String
-  recipe      Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  
-  url         String
-  alt         String?
-  caption     String?
-  isPrimary   Boolean @default(false)
-  order       Int     @default(0)
-  
-  createdAt   DateTime @default(now())
+  id        String   @id @default(cuid())
+  recipeId  String
+  url       String
+  alt       String?
+  caption   String?
+  isPrimary Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@map("recipe_images")
 }
 
-// Social Features
 model Review {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recipeId  String
-  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  
-  title     String?
-  content   String
-  rating    Int      // 1-5 stars
+  id             String   @id @default(cuid())
+  userId         String
+  recipeId       String
+  title          String?
+  content        String
+  rating         Int
   wouldMakeAgain Boolean?
-  
-  // Modifications made
-  modifications String?
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  modifications  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  recipe         Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, recipeId])
   @@map("reviews")
 }
 
 model Rating {
-  id       String @id @default(cuid())
-  userId   String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recipeId String
-  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  
-  value    Int    // 1-5 stars
-  
+  id        String   @id @default(cuid())
+  userId    String
+  recipeId  String
+  value     Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, recipeId])
   @@map("ratings")
 }
 
 model Comment {
-  id       String @id @default(cuid())
-  userId   String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recipeId String
-  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  
-  content  String
-  imageUrl String?
-  parentId String?
-  parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id])
-  replies  Comment[] @relation("CommentReplies")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String    @id @default(cuid())
+  userId    String
+  recipeId  String
+  content   String
+  parentId  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  imageUrl  String?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+  recipe    Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("comments")
 }
 
 model Favorite {
-  id       String @id @default(cuid())
-  userId   String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recipeId String
-  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  
+  id        String   @id @default(cuid())
+  userId    String
+  recipeId  String
   createdAt DateTime @default(now())
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, recipeId])
   @@map("favorites")
 }
 
 model Follow {
-  id          String @id @default(cuid())
+  id          String   @id @default(cuid())
   followerId  String
-  follower    User   @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
   followingId String
-  following   User   @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
-  
   createdAt   DateTime @default(now())
+  follower    User     @relation("Follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Following", fields: [followingId], references: [id], onDelete: Cascade)
 
   @@unique([followerId, followingId])
   @@map("follows")
 }
 
-// Collections and Organization
 model RecipeCollection {
-  id          String @id @default(cuid())
+  id          String                 @id @default(cuid())
   userId      String
-  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   name        String
   description String?
-  isPublic    Boolean @default(true)
-  
+  isPublic    Boolean                @default(true)
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
   items       RecipeCollectionItem[]
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  user        User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("recipe_collections")
 }
@@ -376,31 +303,26 @@ model RecipeCollection {
 model RecipeCollectionItem {
   id           String           @id @default(cuid())
   collectionId String
-  collection   RecipeCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
   recipeId     String
-  recipe       Recipe           @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  
   order        Int              @default(0)
   addedAt      DateTime         @default(now())
+  collection   RecipeCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  recipe       Recipe           @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@unique([collectionId, recipeId])
   @@map("recipe_collection_items")
 }
 
-// Meal Planning
 model MealPlan {
   id        String         @id @default(cuid())
   userId    String
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   name      String
   startDate DateTime
   endDate   DateTime
-  
-  items     MealPlanItem[]
-  
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
+  items     MealPlanItem[]
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("meal_plans")
 }
@@ -408,13 +330,12 @@ model MealPlan {
 model MealPlanItem {
   id         String   @id @default(cuid())
   mealPlanId String
-  mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
   recipeId   String
-  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  
   date       DateTime
   mealType   MealType
   servings   Int      @default(1)
+  mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@map("meal_plan_items")
 }
@@ -422,13 +343,11 @@ model MealPlanItem {
 model ShoppingList {
   id        String             @id @default(cuid())
   userId    String
-  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   name      String
-  items     ShoppingListItem[]
-  
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt
+  items     ShoppingListItem[]
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("shopping_lists")
 }
@@ -436,54 +355,43 @@ model ShoppingList {
 model ShoppingListItem {
   id             String       @id @default(cuid())
   shoppingListId String
-  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
-  
   name           String
   amount         Float?
   unit           String?
   category       String?
   isCompleted    Boolean      @default(false)
-  
   createdAt      DateTime     @default(now())
+  shoppingList   ShoppingList @relation(fields: [shoppingListId], references: [id], onDelete: Cascade)
 
   @@map("shopping_list_items")
 }
 
-// Nutrition
 model Nutrition {
-  id             String @id @default(cuid())
-  recipeId       String @unique
-  recipe         Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  
-  // Per serving
-  calories       Int?
-  protein        Float? // grams
-  carbohydrates  Float? // grams
-  fat            Float? // grams
-  fiber          Float? // grams
-  sugar          Float? // grams
-  sodium         Float? // milligrams
-  
-  // Vitamins and minerals
-  vitaminC       Float?
-  calcium        Float?
-  iron           Float?
-  
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id            String   @id @default(cuid())
+  recipeId      String   @unique
+  calories      Int?
+  protein       Float?
+  carbohydrates Float?
+  fat           Float?
+  fiber         Float?
+  sugar         Float?
+  sodium        Float?
+  vitaminC      Float?
+  calcium       Float?
+  iron          Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  recipe        Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@map("nutrition")
 }
 
-// Tags and Categories
 model Tag {
-  id          String      @id @default(cuid())
-  name        String      @unique
-  category    TagCategory @default(GENERAL)
-  
-  recipes     RecipeTag[]
-  
-  createdAt   DateTime    @default(now())
+  id        String      @id @default(cuid())
+  name      String      @unique
+  category  TagCategory @default(GENERAL)
+  createdAt DateTime    @default(now())
+  recipes   RecipeTag[]
 
   @@map("tags")
 }
@@ -491,17 +399,212 @@ model Tag {
 model RecipeTag {
   id       String @id @default(cuid())
   recipeId String
-  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   tagId    String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   tag      Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@unique([recipeId, tagId])
   @@map("recipe_tags")
 }
 
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String
+  stripeSubscriptionId String             @unique
+  stripeCustomerId     String
+  stripePriceId        String
+  tier                 SubscriptionTier
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  canceledAt           DateTime?
+  user                 User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@map("subscriptions")
+}
 
-// Enums
+model RecipeView {
+  id            String   @id @default(cuid())
+  recipeId      String
+  userId        String?
+  isPremiumUser Boolean  @default(false)
+  ipAddress     String?
+  userAgent     String?
+  viewedAt      DateTime @default(now())
+  recipe        Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user          User?    @relation(fields: [userId], references: [id])
+
+  @@map("recipe_views")
+}
+
+model CreatorPayout {
+  id               String       @id @default(cuid())
+  userId           String
+  amount           Float
+  period           String
+  payoutType       PayoutType
+  stripeTransferId String?
+  status           PayoutStatus @default(PENDING)
+  recipeViews      Int          @default(0)
+  liveEventRevenue Float        @default(0)
+  bonusAmount      Float        @default(0)
+  createdAt        DateTime     @default(now())
+  processedAt      DateTime?
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, period])
+  @@map("creator_payouts")
+}
+
+model LiveEvent {
+  id           String              @id @default(cuid())
+  hostId       String
+  title        String
+  description  String?
+  price        Float
+  maxAttendees Int?
+  scheduledFor DateTime
+  duration     Int
+  streamUrl    String?
+  recordingUrl String?
+  status       EventStatus         @default(SCHEDULED)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  attendees    LiveEventAttendee[]
+  host         User                @relation("EventHost", fields: [hostId], references: [id], onDelete: Cascade)
+
+  @@map("live_events")
+}
+
+model LiveEventAttendee {
+  id                    String    @id @default(cuid())
+  eventId               String
+  userId                String
+  paidAmount            Float
+  stripePaymentIntentId String?
+  joinedAt              DateTime?
+  leftAt                DateTime?
+  createdAt             DateTime  @default(now())
+  event                 LiveEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@map("live_event_attendees")
+}
+
+model Post {
+  id        String        @id @default(cuid())
+  authorId  String
+  title     String
+  content   String?
+  problem   String?
+  details   String?
+  category  String        @default("general")
+  tags      String[]      @default([])
+  type      PostType      @default(DISCUSSION)
+  urgency   PostUrgency?
+  votes     Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  comments  PostComment[]
+  postVotes PostVote[]
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("posts")
+}
+
+model PostComment {
+  id        String        @id @default(cuid())
+  postId    String
+  authorId  String
+  content   String
+  parentId  String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  imageUrl  String?
+  likes     Int           @default(0)
+  author    User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent    PostComment?  @relation("PostCommentReplies", fields: [parentId], references: [id])
+  replies   PostComment[] @relation("PostCommentReplies")
+  post      Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("post_comments")
+}
+
+model PostVote {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  value     Int
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+  @@map("post_votes")
+}
+
+model BetaTester {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  firstName    String
+  lastName     String
+  phone        String?
+  experience   String
+  equipment    String
+  interests    String
+  motivation   String
+  status       String        @default("PENDING")
+  inviteCode   String?       @unique
+  joinedAt     DateTime      @default(now())
+  userId       String?       @unique
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  user         User?         @relation("UserBetaTester", fields: [userId], references: [id])
+  chatMessages ChatMessage[]
+
+  @@map("beta_testers")
+}
+
+model ChatMessage {
+  id           String     @id @default(cuid())
+  betaTesterId String
+  message      String
+  isFromAdmin  Boolean    @default(false)
+  adminName    String?
+  createdAt    DateTime   @default(now())
+  betaTester   BetaTester @relation(fields: [betaTesterId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String
+  message    String
+  link       String?
+  read       Boolean  @default(false)
+  actorName  String?
+  actorImage String?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+
+  @@map("feedbacks")
+}
+
 enum SkillLevel {
   BEGINNER
   INTERMEDIATE
@@ -564,116 +667,6 @@ enum TagCategory {
   GENERAL
 }
 
-// Subscription & Creator System
-
-model Subscription {
-  id                String   @id @default(cuid())
-  userId            String
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  stripeSubscriptionId String @unique
-  stripeCustomerId     String
-  stripePriceId        String
-  
-  tier              SubscriptionTier
-  status            SubscriptionStatus @default(ACTIVE)
-  
-  currentPeriodStart DateTime
-  currentPeriodEnd   DateTime
-  
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  canceledAt        DateTime?
-  
-  @@map("subscriptions")
-}
-
-model RecipeView {
-  id         String   @id @default(cuid())
-  recipeId   String
-  recipe     Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  userId     String?
-  user       User?    @relation(fields: [userId], references: [id])
-  
-  isPremiumUser Boolean @default(false)
-  ipAddress     String?
-  userAgent     String?
-  
-  viewedAt      DateTime @default(now())
-  
-  @@map("recipe_views")
-}
-
-model CreatorPayout {
-  id            String        @id @default(cuid())
-  userId        String
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  amount        Float
-  period        String        // "2024-10" for October 2024
-  payoutType    PayoutType
-  
-  stripeTransferId String?
-  status           PayoutStatus @default(PENDING)
-  
-  // Breakdown
-  recipeViews      Int    @default(0)
-  liveEventRevenue Float  @default(0)
-  bonusAmount      Float  @default(0)
-  
-  createdAt     DateTime @default(now())
-  processedAt   DateTime?
-  
-  @@unique([userId, period])
-  @@map("creator_payouts")
-}
-
-model LiveEvent {
-  id          String   @id @default(cuid())
-  hostId      String
-  host        User     @relation("EventHost", fields: [hostId], references: [id], onDelete: Cascade)
-  
-  title       String
-  description String?
-  price       Float    // Price in dollars
-  maxAttendees Int?
-  
-  scheduledFor DateTime
-  duration     Int      // Minutes
-  
-  streamUrl    String?
-  recordingUrl String?
-  
-  status       EventStatus @default(SCHEDULED)
-  
-  attendees    LiveEventAttendee[]
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  @@map("live_events")
-}
-
-model LiveEventAttendee {
-  id        String    @id @default(cuid())
-  eventId   String
-  event     LiveEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  paidAmount Float
-  stripePaymentIntentId String?
-  
-  joinedAt   DateTime?
-  leftAt     DateTime?
-  
-  createdAt  DateTime @default(now())
-  
-  @@unique([eventId, userId])
-  @@map("live_event_attendees")
-}
-
-// Enums for new system
 enum SubscriptionTier {
   FREE
   PREMIUM
@@ -716,67 +709,6 @@ enum EventStatus {
   CANCELED
 }
 
-// Forum / Community Discussion System
-model Post {
-  id          String       @id @default(cuid())
-  authorId    String
-  author      User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  title       String
-  content     String?
-  problem     String?
-  details     String?
-  category    String       @default("general")
-  tags        String[]     @default([])
-  type        PostType     @default(DISCUSSION)
-  urgency     PostUrgency?
-
-  votes       Int          @default(0)
-
-  comments    PostComment[]
-  postVotes   PostVote[]
-
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  @@map("posts")
-}
-
-model PostComment {
-  id       String @id @default(cuid())
-  postId   String
-  post     Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
-  content  String
-  imageUrl String?
-  likes    Int     @default(0)
-  parentId String?
-  parent   PostComment?  @relation("PostCommentReplies", fields: [parentId], references: [id])
-  replies  PostComment[] @relation("PostCommentReplies")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("post_comments")
-}
-
-model PostVote {
-  id     String @id @default(cuid())
-  postId String
-  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  value  Int // 1 for up, -1 for down
-
-  createdAt DateTime @default(now())
-
-  @@unique([postId, userId])
-  @@map("post_votes")
-}
-
 enum PostType {
   DISCUSSION
   QUESTION
@@ -787,82 +719,4 @@ enum PostUrgency {
   NORMAL
   HIGH
   URGENT
-}
-
-// Beta Tester System
-model BetaTester {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  firstName   String
-  lastName    String
-  phone       String?
-  
-  // Beta specific info
-  experience  String   // beginner, intermediate, advanced, professional
-  equipment   String   // what BBQ equipment they have
-  interests   String   // comma-separated areas of interest
-  motivation  String   // why they want to join beta
-  
-  // Status
-  status      String @default("PENDING")
-  inviteCode  String?    @unique
-  joinedAt    DateTime   @default(now())
-  
-  // Chat
-  chatMessages ChatMessage[]
-  
-  // User connection (when they create full account)
-  userId      String?  @unique
-  user        User?    @relation("UserBetaTester", fields: [userId], references: [id])
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@map("beta_testers")
-}
-
-model ChatMessage {
-  id           String     @id @default(cuid())
-  betaTesterId String
-  betaTester   BetaTester @relation(fields: [betaTesterId], references: [id], onDelete: Cascade)
-  
-  message      String
-  isFromAdmin  Boolean    @default(false)
-  adminName    String?    // Name of admin who sent message
-  
-  createdAt    DateTime   @default(now())
-  
-  @@map("chat_messages")
-}
-
-// enum BetaStatus {
-//   PENDING
-//   APPROVED
-//   WAITLIST
-//   REJECTED
-// }
-
-model Notification {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type       String   // like, comment, follow, reply, save, competition
-  message    String
-  link       String?
-  read       Boolean  @default(false)
-  actorName  String?
-  actorImage String?
-  createdAt  DateTime @default(now())
-
-  @@map("notifications")
-}
-
-model Feedback {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  message   String   @db.Text
-  createdAt DateTime @default(now())
-
-  @@map("feedbacks")
 }
