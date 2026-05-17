@@ -14,15 +14,43 @@ export async function GET() {
     select: {
       id: true,
       username: true,
+      email: true,
       displayName: true,
+      firstName: true,
+      lastName: true,
       bio: true,
       image: true,
       location: true,
+      joinedAt: true,
       onboardingDone: true,
       favoriteMeats: true,
       cookerType: true,
       skillLevel: true,
       bbqStyle: true,
+      experienceLevel: true,
+      smokerType: true,
+      recipes: {
+        where: { isPublished: true },
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          cookTime: true,
+          servings: true,
+          difficulty: true,
+          category: true,
+          createdAt: true,
+          images: { take: 1, select: { url: true } },
+          _count: { select: { ratings: true, favorites: true } },
+        },
+      },
+      _count: {
+        select: {
+          followers: true,
+          follows: true,
+        },
+      },
     },
   });
 

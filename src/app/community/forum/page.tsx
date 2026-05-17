@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { ArrowLeft, MessageSquare, ThumbsUp, ThumbsDown, Clock, User, Tag, AlertCircle } from 'lucide-react';
+import { FollowButton } from '@/components/FollowButton';
 
 interface Post {
   id: string;
@@ -176,14 +177,18 @@ export default function ForumPage() {
             {posts.map(post => (
               <div key={post.id} className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center space-x-2">
-                      <User className="w-4 h-4 text-gray-500" />
-                      <span className="text-sm font-medium text-gray-900">{post.author.username}</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <span className="text-sm text-gray-500">{formatTimeAgo(post.createdAt)}</span>
+                  <div className="flex items-center flex-wrap gap-2">
+                    <User className="w-4 h-4 text-gray-400" />
+                    <Link
+                      href={`/profile/${post.author.username}`}
+                      className="text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors"
+                    >
+                      @{post.author.username}
+                    </Link>
+                    <FollowButton userId={post.author.id} size="sm" />
+                    <div className="flex items-center space-x-1 text-gray-400">
+                      <Clock className="w-3 h-3" />
+                      <span className="text-xs">{formatTimeAgo(post.createdAt)}</span>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">

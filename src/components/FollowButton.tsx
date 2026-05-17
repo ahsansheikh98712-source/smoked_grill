@@ -6,90 +6,70 @@ import { useRouter } from 'next/navigation';
 
 interface FollowButtonProps {
   userId: string;
+  initialIsFollowing?: boolean;
+  size?: 'sm' | 'md';
   className?: string;
 }
 
-export function FollowButton({ userId, className = '' }: FollowButtonProps) {
+export function FollowButton({ userId, initialIsFollowing, size = 'md', className = '' }: FollowButtonProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(initialIsFollowing ?? false);
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const [checking, setChecking] = useState(initialIsFollowing === undefined);
 
   useEffect(() => {
+    if (initialIsFollowing !== undefined) return;
     if (status === 'authenticated' && session?.user?.id) {
-      checkFollowStatus();
-    } else {
+      fetch(`/api/users/${userId}/follow`)
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data) setIsFollowing(data.isFollowing); })
+        .finally(() => setChecking(false));
+    } else if (status !== 'loading') {
       setChecking(false);
     }
-  }, [userId, session, status]);
+  }, [userId, session, status, initialIsFollowing]);
 
-  const checkFollowStatus = async () => {
-    try {
-      const res = await fetch(`/api/users/${userId}/follow`);
-      if (res.ok) {
-        const data = await res.json();
-        setIsFollowing(data.isFollowing);
-      }
-    } catch (error) {
-      console.error('Error checking follow status:', error);
-    } finally {
-      setChecking(false);
-    }
-  };
+  if (session?.user?.id === userId) return null;
 
-  const handleFollow = async () => {
+  const handleToggle = async () => {
     if (status !== 'authenticated') {
       router.push('/auth/signin');
       return;
     }
-
     setLoading(true);
-    const method = isFollowing ? 'DELETE' : 'POST';
-
     try {
-      const res = await fetch(`/api/users/${userId}/follow`, { method });
-      if (res.ok) {
-        setIsFollowing(!isFollowing);
-      } else {
-        const data = await res.json();
-        alert(data.message || 'Failed to update follow status');
-      }
-    } catch (error) {
-      console.error('Follow error:', error);
-      alert('An error occurred');
-    } finally {
-      setLoading(false);
-    }
+      const res = await fetch(`/api/users/${userId}/follow`, {
+        method: isFollowing ? 'DELETE' : 'POST',
+      });
+      if (res.ok) setIsFollowing(f => !f);
+    } catch {}
+    setLoading(false);
   };
 
-  // Don't show button on own profile
-  if (session?.user?.id === userId) {
-    return null;
-  }
+  const sizeClass = size === 'sm' ? 'px-3 py-1 text-xs' : 'px-6 py-2 text-sm';
 
   if (checking) {
     return (
-      <button
-        disabled
-        className={`px-6 py-2 rounded-lg font-medium bg-gray-200 text-gray-500 ${className}`}
-      >
-        Loading...
+      <button disabled className={`${sizeClass} rounded-lg font-medium bg-gray-200 text-gray-500 ${className}`}>
+        ...
       </button>
     );
   }
 
   return (
     <button
-      onClick={handleFollow}
+      onClick={handleToggle}
       disabled={loading}
-      className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
+      className={`${sizeClass} rounded-lg font-medium transition-colors disabled:opacity-50 ${
         isFollowing
-          ? 'bg-gray-200 hover:bg-gray-300 text-gray-800 border border-gray-300'
-          : 'bg-orange-500 hover:bg-orange-600 text-white shadow-lg hover:shadow-xl'
-      } disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+          ? 'bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600 border border-gray-200'
+          : 'bg-orange-500 text-white hover:bg-orange-600'
+      } ${className}`}
     >
-      {loading ? 'Loading...' : isFollowing ? 'Following' : 'Follow'}
+      {loading ? '...' : isFollowing ? 'Following' : 'Follow'}
     </button>
   );
 }
+
+export default FollowButton;

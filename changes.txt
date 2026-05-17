@@ -1,0 +1,149 @@
+Home Page
+
+Anything that says "Community" needs to change to "QueMunity"
+ 
+Top Banner that says Upgrade To premium... Lets change that to Upgrade to Premium Que-Master for just $7.99/Month! And put "Join Waitlist"  
+
+Remove Learn More button
+
+Spots added for 
+"Featured Recipes"
+Trending Recipes, Trending topics in discussion, 
+
+Recipes Tab
+
+A few more filters added for Basic signup (available after signup with something that let's people know that) 
+
+When people add recipes we want to make sure that a pic shows as a thumbnail. also that they can add pics/videos to their recipes. 
+
+Add quick categories to choose from. Examples - Beef, Pork, Poultry, Seafood, Wild Game, Sides, Desserts, etc. 
+
+Que-Munity tab
+
+Que-Masters, not Pitmasters. for the whole website
+
+
+BBQ Tools
+
+make functionable
+
+Guides
+
+more filtering options Examples - Beef, Pork, Poultry, Seafood, Wild Game, Sides, Desserts, etc.
+
+Guides can be viewed, saved, and rated by anyone. Must be a premium member to post them.
+
+Premium 
+
+Join the waitlist instead of be the first to know.
+
+free vs premium tier has been sent in fiverr messages. please have them listed here. 
+
+sign in 
+
+let people sign up with google or facebook. get rid of GitHub.
+
+
+Misc.
+
+Make sure user profiles are fully functional:
+profile photo
+bio
+posted recipes
+saved recipes
+followers/following
+premium badge/flair
+social links optional
+Add notifications system:
+likes
+comments
+follows
+replies
+recipe saves
+competition announcements
+Mobile-first responsive design is REQUIRED across all pages.
+Make sure recipe pages are SEO optimized:
+proper URLs
+meta titles/descriptions
+schema markup if possible
+share preview images
+Add report system for:
+recipes
+comments
+posts
+users
+Add admin moderation panel:
+remove recipes/posts/comments
+assign featured recipes
+assign badges
+manage premium users
+approve/reject guides
+Add upload compression/optimization:
+optimize large images/videos automatically
+prevent extremely large uploads
+Add placeholder/default thumbnail if recipe has no image uploaded.
+Add “Most Cooked”, “Most Saved”, and “Newest” sorting options.
+Add basic analytics:
+recipe views
+saves
+likes
+comments
+profile views
+
+
+Creators LOVE stats.
+
+Make sure comments support:
+images/photos
+replies/threaded comments
+likes
+
+This is HUGE for community engagement.
+
+Add share functionality:
+Facebook
+copy link
+text/share sheet on mobile
+Add onboarding flow for new users:
+favorite meats
+cooker type
+skill level
+favorite BBQ style
+
+This helps personalize feeds/search later.
+
+Add featured creator / featured Que-Master areas.
+Add ability for admins to pin:
+recipes
+discussions
+guides
+competitions
+Add loading skeletons/spinners so app feels smooth and modern.
+Make sure all premium-gated features show upgrade prompts instead of dead ends.
+
+Example:
+
+“Upgrade to Premium Que-Master to unlock Cook Planner 🔥”
+
+Add account deletion + export options for legal/privacy compliance.
+Add Terms of Service + Privacy Policy pages before launch.
+Add email verification + password reset flows.
+Add anti-spam/basic moderation protections:
+rate limiting
+captcha if needed
+profanity filter optional
+
+“Reserve architecture for future competitions/events system”
+
+Even if competitions are simple at launch, your DB structure should anticipate:
+
+submissions
+voting
+judges
+brackets
+categories
+prizes
+leaderboards
+
+i made you an admin
+supabase

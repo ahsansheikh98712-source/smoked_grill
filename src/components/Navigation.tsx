@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
-import { Menu, X, Flame, User, LogOut, ChefHat, Bell } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Menu, X, Flame, User, LogOut, ChefHat, Bell, Search } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 
 interface Notification {
@@ -21,7 +21,11 @@ export default function Navigation() {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
   const { data: session, status } = useSession();
 
   useEffect(() => {
@@ -58,6 +62,20 @@ export default function Navigation() {
     setIsDropdownOpen(false);
     await signOut({ callbackUrl: '/' });
   };
+
+  const handleSearch = useCallback(async (q: string) => {
+    setSearchQuery(q);
+    if (q.trim().length < 2) { setSearchResults([]); return; }
+    setIsSearching(true);
+    try {
+      const res = await fetch(`/api/users/search?q=${encodeURIComponent(q)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSearchResults(data.users || []);
+      }
+    } catch {}
+    setIsSearching(false);
+  }, []);
 
   const baseNavItems = [
     { href: '/', label: 'Home' },
@@ -97,16 +115,59 @@ export default function Navigation() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="px-3 py-2 rounded-md transition-colors text-orange-400 hover:text-orange-300 hover:bg-slate-800"
+                className="px-3 py-2 rounded-md transition-colors text-orange-400 hover:text-orange-300 hover:bg-slate-800 text-sm"
               >
                 {item.label}
               </Link>
             ))}
+
+            {/* User Search */}
+            <div className="relative" ref={searchRef}>
+              <div className="flex items-center bg-slate-800 rounded-lg px-3 py-1.5 gap-2">
+                <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Search users..."
+                  value={searchQuery}
+                  onChange={e => handleSearch(e.target.value)}
+                  className="bg-transparent text-white text-sm placeholder-gray-400 focus:outline-none w-36"
+                />
+              </div>
+              {(searchResults.length > 0 || (isSearching && searchQuery.length >= 2)) && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => { setSearchQuery(''); setSearchResults([]); }} />
+                  <div className="absolute top-full right-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-gray-200 z-20 overflow-hidden">
+                    {isSearching ? (
+                      <div className="px-4 py-3 text-sm text-gray-500">Searching...</div>
+                    ) : searchResults.length === 0 ? (
+                      <div className="px-4 py-3 text-sm text-gray-500">No users found</div>
+                    ) : (
+                      searchResults.map((u: any) => (
+                        <Link
+                          key={u.id}
+                          href={`/profile/${u.username}`}
+                          onClick={() => { setSearchQuery(''); setSearchResults([]); }}
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 transition-colors border-b border-gray-50 last:border-0"
+                        >
+                          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                            {u.image ? <img src={u.image} alt={u.username} className="w-full h-full rounded-full object-cover" /> : (u.displayName || u.username).charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-sm font-semibold text-gray-900 truncate">{u.displayName || u.username}</div>
+                            <div className="text-xs text-gray-500">@{u.username} · {u._count?.recipes ?? 0} recipes</div>
+                          </div>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
             
             {/* Notification Bell */}
             {session && status === 'authenticated' && (

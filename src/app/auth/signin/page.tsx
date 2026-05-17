@@ -11,17 +11,18 @@ function SignInForm() {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [phone, setPhone] = useState('');
   const [birthday, setBirthday] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
-  
+
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
+  const callbackUrl = searchParams.get('callbackUrl') || '/profile';
+
+  const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,23 +31,23 @@ function SignInForm() {
 
     try {
       if (isSignUp) {
-        // Handle sign up
-        // Basic client-side validation
         if (!firstName || !lastName || !displayName || !email || !password || !birthday) {
-          setError('Please fill all required fields (first name, last name, display name, email, password, birthday)');
+          setError('Please fill all required fields');
+          setLoading(false);
+          return;
+        }
+        if (!isValidEmail(email)) {
+          setError('Please enter a valid email address');
+          setLoading(false);
+          return;
+        }
+        if (password.length < 6) {
+          setError('Password must be at least 6 characters');
           setLoading(false);
           return;
         }
 
-        const payload = {
-          firstName,
-          lastName,
-          displayName,
-          phone,
-          birthday,
-          email,
-          password,
-        };
+        const payload = { firstName, lastName, displayName, birthday, email, password };
 
         const response = await fetch('/api/simple-signup', {
           method: 'POST',
@@ -65,7 +66,7 @@ function SignInForm() {
           });
           
           if (result?.ok) {
-            router.push(callbackUrl);
+            router.push('/profile');
           } else {
             setError('Account created but sign-in failed. Please try signing in manually.');
           }
@@ -73,7 +74,11 @@ function SignInForm() {
           setError(data.message || 'Sign up failed');
         }
       } else {
-        // Handle sign in
+        if (!isValidEmail(email)) {
+          setError('Please enter a valid email address');
+          setLoading(false);
+          return;
+        }
         const result = await signIn('credentials', {
           email,
           password,
@@ -81,7 +86,7 @@ function SignInForm() {
         });
 
         if (result?.ok) {
-          router.push(callbackUrl);
+          router.push('/profile');
         } else {
           setError('Invalid email or password');
         }
@@ -211,19 +216,10 @@ function SignInForm() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
-                        <div className="mt-1">
-                          <input id="phone" name="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm" placeholder="(555) 555-5555" />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label htmlFor="birthday" className="block text-sm font-medium text-gray-700">Birthday</label>
-                        <div className="mt-1">
-                          <input id="birthday" name="birthday" type="date" required value={birthday} onChange={(e) => setBirthday(e.target.value)} className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm" />
-                        </div>
+                    <div>
+                      <label htmlFor="birthday" className="block text-sm font-medium text-gray-700">Birthday</label>
+                      <div className="mt-1">
+                        <input id="birthday" name="birthday" type="date" required value={birthday} onChange={(e) => setBirthday(e.target.value)} className="appearance-none block w-full px-3 py-3 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm" />
                       </div>
                     </div>
                   </>
