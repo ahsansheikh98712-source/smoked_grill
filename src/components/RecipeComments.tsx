@@ -131,7 +131,7 @@ function CommentItem({
 }
 
 export default function RecipeComments({ recipeId }: RecipeCommentsProps) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState('');
@@ -222,7 +222,9 @@ export default function RecipeComments({ recipeId }: RecipeCommentsProps) {
       </div>
 
       {/* Comment Form */}
-      {session?.user ? (
+      {status === 'loading' ? (
+        <div className="mb-8 h-24 bg-gray-50 rounded-lg animate-pulse" />
+      ) : status === 'authenticated' && session?.user ? (
         <form onSubmit={handleSubmit} className="mb-8">
           {replyTo && (
             <div className="flex items-center gap-2 mb-2 text-sm text-orange-600 bg-orange-50 px-3 py-2 rounded-lg">
@@ -282,14 +284,14 @@ export default function RecipeComments({ recipeId }: RecipeCommentsProps) {
             </div>
           </div>
         </form>
-      ) : (
+      ) : status === 'unauthenticated' ? (
         <div className="bg-gray-50 rounded-lg p-4 mb-6 text-center">
           <p className="text-gray-600 text-sm mb-2">Sign in to join the conversation</p>
           <a href="/auth/signin" className="inline-block bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 text-sm font-medium">
-            Sign In
+            Sign In to Comment
           </a>
         </div>
-      )}
+      ) : null}
 
       {/* Comments List */}
       {loading ? (
