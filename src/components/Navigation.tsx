@@ -128,15 +128,15 @@ export default function Navigation() {
 
             {/* User Search */}
             <div className="relative" ref={searchRef}>
-              <div className="flex items-center bg-slate-700 border border-slate-600 rounded-lg px-3 py-1.5 gap-2 focus-within:border-orange-500">
+              <div className="flex items-center rounded-lg px-3 py-1.5 gap-2 border border-slate-600 focus-within:border-orange-500" style={{ backgroundColor: '#1e293b' }}>
                 <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
                 <input
                   type="text"
                   placeholder="Search users..."
                   value={searchQuery}
                   onChange={e => handleSearch(e.target.value)}
-                  className="bg-slate-700 text-white text-sm placeholder-slate-400 focus:outline-none w-32"
-                  style={{ colorScheme: 'dark' }}
+                  className="text-white text-sm placeholder-slate-400 focus:outline-none w-32"
+                  style={{ background: 'transparent', colorScheme: 'dark' }}
                 />
               </div>
               {(searchResults.length > 0 || (isSearching && searchQuery.length >= 2)) && (
