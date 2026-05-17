@@ -341,7 +341,7 @@ export default function RecipeReviews({ recipeId, existingReviews = [] }: Recipe
                 </div>
                 
                 {/* Edit/Delete buttons for review author */}
-                {currentUser && currentUser.username === review.author && (
+                {session?.user && ((session.user as any)?.username === review.author || session.user?.name === review.author) && (
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleEditReview(review)}
@@ -390,7 +390,7 @@ export default function RecipeReviews({ recipeId, existingReviews = [] }: Recipe
             <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No reviews yet</h3>
             <p className="text-gray-500 mb-4">Be the first to review this recipe!</p>
-            {currentUser && (
+            {status === 'authenticated' && session?.user && (
               <button
                 onClick={() => setShowReviewForm(true)}
                 className="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700"
