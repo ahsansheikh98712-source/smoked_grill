@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Star, ThumbsUp, MessageCircle, Edit2, Trash2 } from 'lucide-react';
 
 interface Review {
@@ -21,9 +22,9 @@ interface RecipeReviewsProps {
 }
 
 export default function RecipeReviews({ recipeId, existingReviews = [] }: RecipeReviewsProps) {
+  const { data: session, status } = useSession();
   const [reviews, setReviews] = useState<Review[]>(existingReviews);
   const [showReviewForm, setShowReviewForm] = useState(false);
-  const [currentUser, setCurrentUser] = useState<any>(null);
   const [editingReview, setEditingReview] = useState<string | null>(null);
   const [newReview, setNewReview] = useState({
     rating: 0,
@@ -33,36 +34,6 @@ export default function RecipeReviews({ recipeId, existingReviews = [] }: Recipe
     wouldMakeAgain: true
   });
 
-  // Check for current user and listen for auth changes
-  useEffect(() => {
-    const checkUser = () => {
-      const userData = localStorage.getItem('currentUser');
-      if (userData) {
-        try {
-          setCurrentUser(JSON.parse(userData));
-        } catch (error) {
-          setCurrentUser(null);
-        }
-      } else {
-        setCurrentUser(null);
-      }
-    };
-
-    checkUser();
-    
-    // Listen for storage changes (when user signs in/out)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'currentUser') {
-        checkUser();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
 
   const handleRatingClick = (rating: number) => {
     setNewReview(prev => ({ ...prev, rating }));
@@ -71,7 +42,7 @@ export default function RecipeReviews({ recipeId, existingReviews = [] }: Recipe
   const handleSubmitReview = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!currentUser) {
+    if (!session?.user) {
       alert('Please sign in to leave a review');
       return;
     }
@@ -111,7 +82,7 @@ export default function RecipeReviews({ recipeId, existingReviews = [] }: Recipe
       // Create new review
       const review: Review = {
         id: Date.now().toString(),
-        author: currentUser.username || 'Anonymous',
+        author: (session?.user as any)?.username || session?.user?.name || 'Anonymous',
         rating: newReview.rating,
         title: newReview.title || '',
         comment: newReview.comment,
@@ -197,7 +168,7 @@ export default function RecipeReviews({ recipeId, existingReviews = [] }: Recipe
           </div>
         </div>
         
-        {currentUser && !showReviewForm && (
+        {status === 'authenticated' && session?.user && !showReviewForm && (
           <button
             onClick={() => setShowReviewForm(true)}
             className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 flex items-center"
@@ -324,15 +295,15 @@ export default function RecipeReviews({ recipeId, existingReviews = [] }: Recipe
       )}
 
       {/* Sign-in prompt for non-authenticated users */}
-      {!currentUser && !showReviewForm && (
+      {status === 'unauthenticated' && !showReviewForm && (
         <div className="bg-gray-50 rounded-lg p-4 mb-6 text-center">
           <p className="text-gray-600 mb-3">Want to share your experience with this recipe?</p>
-          <button
-            onClick={() => window.location.href = '/simple-login'}
-            className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
+          <a
+            href="/auth/signin"
+            className="inline-block bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700"
           >
             Sign In to Write Review
-          </button>
+          </a>
         </div>
       )}
 

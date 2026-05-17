@@ -128,14 +128,15 @@ export default function Navigation() {
 
             {/* User Search */}
             <div className="relative" ref={searchRef}>
-              <div className="flex items-center bg-slate-800 rounded-lg px-3 py-1.5 gap-2">
-                <Search className="w-4 h-4 text-gray-400 flex-shrink-0" />
+              <div className="flex items-center bg-slate-700 border border-slate-600 rounded-lg px-3 py-1.5 gap-2 focus-within:border-orange-500">
+                <Search className="w-4 h-4 text-slate-400 flex-shrink-0" />
                 <input
                   type="text"
                   placeholder="Search users..."
                   value={searchQuery}
                   onChange={e => handleSearch(e.target.value)}
-                  className="bg-transparent text-white text-sm placeholder-gray-400 focus:outline-none w-36"
+                  className="bg-slate-700 text-white text-sm placeholder-slate-400 focus:outline-none w-32"
+                  style={{ colorScheme: 'dark' }}
                 />
               </div>
               {(searchResults.length > 0 || (isSearching && searchQuery.length >= 2)) && (
@@ -256,13 +257,13 @@ export default function Navigation() {
                       className="fixed inset-0 z-10"
                       onClick={() => setIsDropdownOpen(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
                       <div className="py-2">
-                        <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900">
+                        <div className="px-4 py-3 border-b border-gray-100">
+                          <p className="text-sm font-semibold text-gray-900 truncate">
                             {getUserName()}
                           </p>
-                          <p className="text-sm text-gray-500">{session.user.email}</p>
+                          <p className="text-xs text-gray-500 truncate mt-0.5">{session.user.email}</p>
                         </div>
 
                         <Link
