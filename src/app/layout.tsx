@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import SessionProvider from "@/components/SessionProvider";
 import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 import SubscriptionBanner from "@/components/SubscriptionBanner";
 import OnboardingGate from "@/components/OnboardingGate";
 import Script from 'next/script';
@@ -67,6 +68,7 @@ export default function RootLayout({
           <main>
             {children}
           </main>
+          <Footer />
         </SessionProvider>
       </body>
     </html>

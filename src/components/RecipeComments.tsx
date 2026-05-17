@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { MessageCircle, Send, Trash2, Reply, ChevronDown, ChevronUp, Image, X } from 'lucide-react';
 
 interface CommentUser {
@@ -61,11 +62,13 @@ function CommentItem({
   return (
     <div className={depth > 0 ? 'ml-8 mt-3 border-l-2 border-orange-100 pl-4' : ''}>
       <div className="flex items-start gap-3">
-        <Avatar username={comment.user.username} image={comment.user.image} />
+        <Link href={`/profile/${comment.user.username}`}>
+          <Avatar username={comment.user.username} image={comment.user.image} />
+        </Link>
         <div className="flex-1 min-w-0">
           <div className="bg-gray-50 rounded-lg px-4 py-3">
             <div className="flex items-center justify-between mb-1">
-              <span className="font-semibold text-sm text-gray-900">{comment.user.username}</span>
+              <Link href={`/profile/${comment.user.username}`} className="font-semibold text-sm text-gray-900 hover:text-orange-600 transition-colors">{comment.user.username}</Link>
               <span className="text-xs text-gray-400">{formatTimeAgo(comment.createdAt)}</span>
             </div>
             <p className="text-gray-700 text-sm whitespace-pre-wrap">{comment.content}</p>

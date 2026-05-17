@@ -208,7 +208,9 @@ export default function RecipePage() {
                     <span className="font-medium">{recipe.avgRating.toFixed(1)}</span>
                     <span className="ml-1">({recipe._count.reviews} reviews)</span>
                   </div>
-                  <span>by {recipe.author.username}</span>
+                  <Link href={`/profile/${recipe.author.username}`} className="hover:text-orange-600 transition-colors">
+                    by {recipe.author.username}
+                  </Link>
                 </div>
               </div>
               <div className="flex space-x-3 mt-4 lg:mt-0">
